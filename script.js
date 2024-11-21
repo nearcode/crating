@@ -3,6 +3,7 @@ let activeObject = null;
 // Set the active object to place
 function setActiveObject(objectId) {
     activeObject = objectId;
+    alert("Object 1 is selected! Click anywhere to place it.");
 }
 
 // Function to place an object at the clicked position
@@ -10,37 +11,19 @@ document.querySelector('a-scene').addEventListener('click', (event) => {
     if (!activeObject) return;
 
     // Get click position
-    const position = event.detail.intersection.point;
+    const position = event.detail.intersection ? event.detail.intersection.point : { x: 0, y: 0, z: -1 };
 
     // Add a new object to the scene
     const object = document.createElement('a-entity');
     object.setAttribute('gltf-model', `#${activeObject}`);
     object.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
-    object.setAttribute('scale', '0.5 0.5 0.5'); // Adjust the scale as needed
+    object.setAttribute('scale', '2 2 2'); // Adjust the scale for better visibility
+    object.setAttribute('rotation', '0 0 0'); // Default rotation
 
     document.getElementById('object-container').appendChild(object);
 });
 
 // Preload objects
 document.addEventListener('DOMContentLoaded', () => {
-    const scene = document.querySelector('a-scene');
-    
-    // Add the first object
-    const objects = {
-        object1: 'https://cdn.jsdelivr.net/gh/nearcode/crating@3027978bac5a5f024704ee3c66f334021c7233ca/untitled.glb',
-        object2: '', // Add link for object2 here
-        object3: '', // Add link for object3 here
-        object4: '', // Add link for object4 here
-        object5: '', // Add link for object5 here
-        object6: ''  // Add link for object6 here
-    };
-
-    for (const [id, src] of Object.entries(objects)) {
-        if (src) { // Add only objects with valid links
-            const asset = document.createElement('a-asset-item');
-            asset.setAttribute('id', id);
-            asset.setAttribute('src', src);
-            scene.appendChild(asset);
-        }
-    }
+    console.log("Scene is loaded and ready.");
 });
