@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web AR - Object Placement</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ar.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a-scene embedded arjs>
+        <!-- Plane Detection -->
+        <a-entity id="ground" geometry="primitive: plane; width: 10; height: 10;" 
+                  material="color: #ffffff; opacity: 0.3;" 
+                  position="0 0 -1" rotation="-90 0 0" arjs-anchor>
+        </a-entity>
+
+        <!-- Placeholder for objects -->
+        <a-entity id="object-container" position="0 0 0"></a-entity>
+
+        <!-- Camera -->
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- UI Buttons -->
+    <div id="ui-controls">
+        <button onclick="setActiveObject('object1')">Object 1</button>
+        <button onclick="setActiveObject('object2')">Object 2</button>
+        <button onclick="setActiveObject('object3')">Object 3</button>
+        <button onclick="setActiveObject('object4')">Object 4</button>
+        <button onclick="setActiveObject('object5')">Object 5</button>
+        <button onclick="setActiveObject('object6')">Object 6</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
