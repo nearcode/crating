@@ -3,16 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR Floor Placement</title>
+  <title>AR Object Placement</title>
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR Floor Placement</title>
-  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/nearcode/crating@3027978bac5a5f024704ee3c66f334021c7233ca/untitled.glb"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ar.js@3.3.2/aframe/build/aframe-ar.min.js"></script>
   <style>
     body { margin: 0; overflow: hidden; }
     .ui-panel {
@@ -36,60 +29,41 @@
 <body>
   <!-- Scene -->
   <a-scene embedded arjs>
-    <!-- Camera -->
-    <a-entity camera look-controls></a-entity>
+    <!-- กล้อง AR -->
+    <a-camera look-controls></a-camera>
 
     <!-- พื้นผิวที่ตรวจจับ -->
-    <a-plane id="ground" rotation="-90 0 0" width="10" height="10" color="lightgrey" visible="false"></a-plane>
+    <a-plane id="ground" rotation="-90 0 0" width="10" height="10" color="lightgrey" opacity="0.2"></a-plane>
 
-    <!-- วัตถุ 3D -->
+    <!-- โหนดสำหรับวัตถุ -->
     <a-entity id="models"></a-entity>
 
     <!-- แสง -->
-    <a-light type="directional" position="0 2 5"></a-light>
+    <a-light type="directional" position="0 5 5"></a-light>
     <a-light type="ambient" color="#ffffff"></a-light>
   </a-scene>
 
-  <!-- UI สำหรับเลือกของตกแต่ง -->
+  <!-- UI -->
   <div class="ui-panel">
-    <button class="ui-button" onclick="addObject('chair')">เก้าอี้</button>
-    <button class="ui-button" onclick="addObject('table')">โต๊ะ</button>
-    <button class="ui-button" onclick="addObject('lamp')">โคมไฟ</button>
+    <button class="ui-button" onclick="placeObject()">วางวัตถุ</button>
   </div>
 
   <script>
-    // ฟังก์ชันสำหรับเพิ่มวัตถุ
-    function addObject(type) {
+    // ฟังก์ชันวางวัตถุ
+    function placeObject() {
       const scene = document.querySelector('#models');
       const camera = document.querySelector('a-camera');
       const ground = document.querySelector('#ground');
-      let model;
 
-      // สร้างวัตถุตามชนิด
-      if (type === 'chair') {
-        model = document.createElement('a-box');
-        model.setAttribute('color', '#4CC3D9');
-        model.setAttribute('depth', '0.5');
-        model.setAttribute('height', '0.5');
-        model.setAttribute('width', '0.5');
-      } else if (type === 'table') {
-        model = document.createElement('a-box');
-        model.setAttribute('color', '#FFC65D');
-        model.setAttribute('depth', '1');
-        model.setAttribute('height', '0.1');
-        model.setAttribute('width', '1');
-      } else if (type === 'lamp') {
-        model = document.createElement('a-cone');
-        model.setAttribute('color', '#FF5733');
-        model.setAttribute('radius-bottom', '0.2');
-        model.setAttribute('radius-top', '0');
-        model.setAttribute('height', '0.5');
-      }
+      // สร้างโมเดล
+      const model = document.createElement('a-entity');
+      model.setAttribute('gltf-model', 'https://cdn.jsdelivr.net/gh/nearcode/crating@3027978bac5a5f024704ee3c66f334021c7233ca/untitled.glb');
+      model.setAttribute('scale', '0.5 0.5 0.5'); // ปรับขนาด
 
-      // ใช้ Raycaster เพื่อวางวัตถุ
+      // ใช้ Raycaster เพื่อค้นหาพื้นที่
       const raycaster = new THREE.Raycaster();
       const cameraEl = camera.components.camera.camera;
-      const direction = new THREE.Vector3(0, 0, -1);
+      const direction = new THREE.Vector3(0, 0, -1); // ทิศทางจากกล้อง
       direction.applyQuaternion(cameraEl.quaternion);
 
       raycaster.set(cameraEl.position, direction);
@@ -100,100 +74,7 @@
         model.setAttribute('position', `${point.x} ${point.y} ${point.z}`);
         scene.appendChild(model);
       } else {
-        alert("ไม่พบพื้นผิวที่สามารถวางได้");
-      }
-    }
-  </script>
-</body>
-</html>"></script>
-  <style>
-    body { margin: 0; overflow: hidden; }
-    .ui-panel {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 10px;
-    }
-    .ui-button {
-      background-color: #ffffff;
-      border: 1px solid #ccc;
-      padding: 10px 15px;
-      font-size: 14px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-  </style>
-</head>
-<body>
-  <!-- Scene -->
-  <a-scene embedded arjs>
-    <!-- Camera -->
-    <a-entity camera look-controls></a-entity>
-
-    <!-- พื้นผิวที่ตรวจจับ -->
-    <a-plane id="ground" rotation="-90 0 0" width="10" height="10" color="lightgrey" visible="false"></a-plane>
-
-    <!-- วัตถุ 3D -->
-    <a-entity id="models"></a-entity>
-
-    <!-- แสง -->
-    <a-light type="directional" position="0 2 5"></a-light>
-    <a-light type="ambient" color="#ffffff"></a-light>
-  </a-scene>
-
-  <!-- UI สำหรับเลือกของตกแต่ง -->
-  <div class="ui-panel">
-    <button class="ui-button" onclick="addObject('chair')">เก้าอี้</button>
-    <button class="ui-button" onclick="addObject('table')">โต๊ะ</button>
-    <button class="ui-button" onclick="addObject('lamp')">โคมไฟ</button>
-  </div>
-
-  <script>
-    // ฟังก์ชันสำหรับเพิ่มวัตถุ
-    function addObject(type) {
-      const scene = document.querySelector('#models');
-      const camera = document.querySelector('a-camera');
-      const ground = document.querySelector('#ground');
-      let model;
-
-      // สร้างวัตถุตามชนิด
-      if (type === 'chair') {
-        model = document.createElement('a-box');
-        model.setAttribute('color', '#4CC3D9');
-        model.setAttribute('depth', '0.5');
-        model.setAttribute('height', '0.5');
-        model.setAttribute('width', '0.5');
-      } else if (type === 'table') {
-        model = document.createElement('a-box');
-        model.setAttribute('color', '#FFC65D');
-        model.setAttribute('depth', '1');
-        model.setAttribute('height', '0.1');
-        model.setAttribute('width', '1');
-      } else if (type === 'lamp') {
-        model = document.createElement('a-cone');
-        model.setAttribute('color', '#FF5733');
-        model.setAttribute('radius-bottom', '0.2');
-        model.setAttribute('radius-top', '0');
-        model.setAttribute('height', '0.5');
-      }
-
-      // ใช้ Raycaster เพื่อวางวัตถุ
-      const raycaster = new THREE.Raycaster();
-      const cameraEl = camera.components.camera.camera;
-      const direction = new THREE.Vector3(0, 0, -1);
-      direction.applyQuaternion(cameraEl.quaternion);
-
-      raycaster.set(cameraEl.position, direction);
-      const intersects = raycaster.intersectObject(ground.object3D, true);
-
-      if (intersects.length > 0) {
-        const point = intersects[0].point;
-        model.setAttribute('position', `${point.x} ${point.y} ${point.z}`);
-        scene.appendChild(model);
-      } else {
-        alert("ไม่พบพื้นผิวที่สามารถวางได้");
+        alert("ไม่พบพื้นผิวที่ตรวจจับได้");
       }
     }
   </script>
