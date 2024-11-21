@@ -30,10 +30,10 @@
   <!-- Scene -->
   <a-scene embedded arjs>
     <!-- กล้อง AR -->
-    <a-camera look-controls></a-camera>
+    <a-camera position="0 0 0" look-controls></a-camera>
 
-    <!-- พื้นผิวที่ตรวจจับ -->
-    <a-plane id="ground" rotation="-90 0 0" width="10" height="10" color="lightgrey" opacity="0.2"></a-plane>
+    <!-- พื้นผิวสำหรับการตรวจจับ -->
+    <a-plane id="ground" rotation="-90 0 0" width="10" height="10" color="#7BC8A4" visible="false"></a-plane>
 
     <!-- โหนดสำหรับวัตถุ -->
     <a-entity id="models"></a-entity>
@@ -49,30 +49,38 @@
   </div>
 
   <script>
-    // ฟังก์ชันวางวัตถุ
     function placeObject() {
-      const scene = document.querySelector('#models');
-      const camera = document.querySelector('a-camera');
+      const models = document.querySelector('#models');
       const ground = document.querySelector('#ground');
+      const camera = document.querySelector('a-camera');
 
-      // สร้างโมเดล
+      // ตรวจสอบว่ากล้องและพื้นพร้อมใช้งาน
+      if (!camera.components.camera || !ground.object3D) {
+        alert("AR ยังไม่พร้อมใช้งาน กรุณาลองใหม่อีกครั้ง");
+        return;
+      }
+
+      // สร้างโมเดลใหม่
       const model = document.createElement('a-entity');
-      model.setAttribute('gltf-model', 'https://cdn.jsdelivr.net/gh/nearcode/crating@3027978bac5a5f024704ee3c66f334021c7233ca/untitled.glb');
-      model.setAttribute('scale', '0.5 0.5 0.5'); // ปรับขนาด
+      model.setAttribute(
+        'gltf-model',
+        'https://cdn.jsdelivr.net/gh/nearcode/crating@3027978bac5a5f024704ee3c66f334021c7233ca/untitled.glb'
+      );
+      model.setAttribute('scale', '0.5 0.5 0.5'); // ปรับขนาดโมเดล
 
-      // ใช้ Raycaster เพื่อค้นหาพื้นที่
+      // ใช้ Raycaster เพื่อคำนวณตำแหน่งที่กล้องกำลังมอง
       const raycaster = new THREE.Raycaster();
       const cameraEl = camera.components.camera.camera;
-      const direction = new THREE.Vector3(0, 0, -1); // ทิศทางจากกล้อง
+      const direction = new THREE.Vector3(0, 0, -1); // ทิศทางที่กล้องมอง
       direction.applyQuaternion(cameraEl.quaternion);
 
       raycaster.set(cameraEl.position, direction);
       const intersects = raycaster.intersectObject(ground.object3D, true);
 
       if (intersects.length > 0) {
-        const point = intersects[0].point;
-        model.setAttribute('position', `${point.x} ${point.y} ${point.z}`);
-        scene.appendChild(model);
+        const point = intersects[0].point; // ตำแหน่งที่ตรวจจับได้
+        model.setAttribute('position', `${point.x} ${point.y + 0.2} ${point.z}`); // ยกขึ้นจากพื้นเล็กน้อย
+        models.appendChild(model);
       } else {
         alert("ไม่พบพื้นผิวที่ตรวจจับได้");
       }
