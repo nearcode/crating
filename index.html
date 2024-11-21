@@ -11,6 +11,11 @@
 </head>
 <body>
     <a-scene embedded arjs>
+        <!-- Load assets -->
+        <a-assets>
+            <a-asset-item id="object1" src="https://cdn.jsdelivr.net/gh/nearcode/crating@3027978bac5a5f024704ee3c66f334021c7233ca/untitled.glb"></a-asset-item>
+        </a-assets>
+
         <!-- Plane Detection -->
         <a-entity id="ground" geometry="primitive: plane; width: 10; height: 10;" 
                   material="color: #ffffff; opacity: 0.3;" 
