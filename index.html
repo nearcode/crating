@@ -32,9 +32,40 @@
     .ui-button:hover {
       transform: scale(1.1);
     }
+    #permission-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 2000;
+      display: none;
+    }
+    #permission-container button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #permission-container button:hover {
+      background-color: #0056b3;
+    }
   </style>
 </head>
 <body>
+  <!-- Permission Request -->
+  <div id="permission-container">
+    <p>ต้องการอนุญาตการเข้าถึงกล้องเพื่อใช้งาน AR</p>
+    <button onclick="requestCameraPermission()">อนุญาตกล้อง</button>
+  </div>
+
   <!-- UI Buttons -->
   <div id="ui-container">
     <!-- Buttons for Bush Model -->
@@ -48,7 +79,7 @@
   </div>
 
   <!-- A-Frame Scene -->
-  <a-scene xrweb>
+  <a-scene xrweb style="display: none;">
     <!-- Bush Model -->
     <a-entity id="bush-container" position="-1 1.5 -3" rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
       <a-entity id="bush" gltf-model="bushnormal.glb"></a-entity>
@@ -64,6 +95,21 @@
   </a-scene>
 
   <script>
+    /**
+     * Request camera permission and show AR scene
+     */
+    function requestCameraPermission() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+          // If permission granted, hide permission UI and show AR scene
+          document.getElementById('permission-container').style.display = 'none';
+          document.querySelector('a-scene').style.display = 'block';
+        })
+        .catch((err) => {
+          alert('ไม่สามารถเข้าถึงกล้องได้: ' + err.message);
+        });
+    }
+
     /**
      * Change the 3D model being displayed
      * @param {string} modelId - ID of the model to change ('bush' or 'daisy')
