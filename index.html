@@ -1,124 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebAR Multiple 3D Models</title>
-  <script src="https://apps.8thwall.com/xrweb.js"></script>
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-    }
-    #ui-container {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 1000;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .ui-button {
-      width: 50px;
-      height: 50px;
-      border: none;
-      background-size: cover;
-      background-repeat: no-repeat;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .ui-button:hover {
-      transform: scale(1.1);
-    }
-    #permission-container {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(255, 255, 255, 0.9);
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      z-index: 2000;
-      display: none;
-    }
-    #permission-container button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #permission-container button:hover {
-      background-color: #0056b3;
-    }
-  </style>
-</head>
-<body>
-  <!-- Permission Request -->
-  <div id="permission-container">
-    <p>ต้องการอนุญาตการเข้าถึงกล้องเพื่อใช้งาน AR</p>
-    <button onclick="requestCameraPermission()">อนุญาตกล้อง</button>
-  </div>
+let activeObject = null;
 
-  <!-- UI Buttons -->
-  <div id="ui-container">
-    <!-- Buttons for Bush Model -->
-    <button class="ui-button" style="background-image: url('sign1.png');" onclick="changeModel('bush', 'bushpink.glb')"></button>
-    <button class="ui-button" style="background-image: url('sign2.png');" onclick="changeModel('bush', 'bushblue.glb')"></button>
-    <button class="ui-button" style="background-image: url('sign3.png');" onclick="changeModel('bush', 'bushnormal.glb')"></button>
-    <!-- Buttons for Daisy Model -->
-    <button class="ui-button" style="background-image: url('sign4.png');" onclick="changeModel('daisy', 'daisypink.glb')"></button>
-    <button class="ui-button" style="background-image: url('sign5.png');" onclick="changeModel('daisy', 'daisyred.glb')"></button>
-    <button class="ui-button" style="background-image: url('sign6.png');" onclick="changeModel('daisy', 'daisywhite.glb')"></button>
-  </div>
+// Set the active object to place
+function setActiveObject(objectId) {
+    activeObject = objectId;
+}
 
-  <!-- A-Frame Scene -->
-  <a-scene xrweb style="display: none;">
-    <!-- Bush Model -->
-    <a-entity id="bush-container" position="-1 1.5 -3" rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
-      <a-entity id="bush" gltf-model="bushnormal.glb"></a-entity>
-    </a-entity>
-    
-    <!-- Daisy Model -->
-    <a-entity id="daisy-container" position="1 1.5 -3" rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
-      <a-entity id="daisy" gltf-model="daisywhite.glb"></a-entity>
-    </a-entity>
+// Function to place an object at the clicked position
+document.querySelector('a-scene').addEventListener('click', (event) => {
+    if (!activeObject) return;
 
-    <!-- AR Camera -->
-    <a-camera position="0 1.6 0" look-controls></a-camera>
-  </a-scene>
+    // Get click position
+    const position = event.detail.intersection.point;
 
-  <script>
-    /**
-     * Request camera permission and show AR scene
-     */
-    function requestCameraPermission() {
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then((stream) => {
-          // If permission granted, hide permission UI and show AR scene
-          document.getElementById('permission-container').style.display = 'none';
-          document.querySelector('a-scene').style.display = 'block';
-        })
-        .catch((err) => {
-          alert('ไม่สามารถเข้าถึงกล้องได้: ' + err.message);
-        });
-    }
+    // Add a new object to the scene
+    const object = document.createElement('a-entity');
+    object.setAttribute('gltf-model', `#${activeObject}`);
+    object.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
+    object.setAttribute('scale', '0.5 0.5 0.5');
 
-    /**
-     * Change the 3D model being displayed
-     * @param {string} modelId - ID of the model to change ('bush' or 'daisy')
-     * @param {string} modelPath - Path to the new 3D model
-     */
-    function changeModel(modelId, modelPath) {
-      const modelEntity = document.getElementById(modelId);
-      modelEntity.setAttribute("https://cdn.jsdelivr.net/gh/nearcode/crating@3027978bac5a5f024704ee3c66f334021c7233ca/untitled.glb", modelPath);
-    }
-  </script>
-</body>
-</html>
+    document.getElementById('object-container').appendChild(object);
+});
+
+// Preload objects
+document.addEventListener('DOMContentLoaded', () => {
+    const scene = document.querySelector('a-scene');
+    ['object1', 'object2', 'object3', 'object4', 'object5', 'object6'].forEach((id) => {
+        const asset = document.createElement('a-asset-item');
+        asset.setAttribute('id', id);
+        asset.setAttribute('src', `https://cdn.jsdelivr.net/gh/nearcode/crating@3027978bac5a5f024704ee3c66f334021c7233ca/untitled.glb`);
+        scene.appendChild(asset);
+    });
+});
