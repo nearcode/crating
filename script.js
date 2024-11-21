@@ -24,7 +24,7 @@ document.querySelector('a-scene').addEventListener('click', (event) => {
 // Preload objects
 document.addEventListener('DOMContentLoaded', () => {
     const scene = document.querySelector('a-scene');
-    ['object1', 'object2', 'object3', 'object4', 'object5', 'object6'].forEach((id) => {
+    ['https://cdn.jsdelivr.net/gh/nearcode/crating@3027978bac5a5f024704ee3c66f334021c7233ca/untitled.glb', 'object2', 'object3', 'object4', 'object5', 'object6'].forEach((id) => {
         const asset = document.createElement('a-asset-item');
         asset.setAttribute('id', id);
         asset.setAttribute('src', `https://cdn.jsdelivr.net/gh/nearcode/crating@3027978bac5a5f024704ee3c66f334021c7233ca/untitled.glb`);
