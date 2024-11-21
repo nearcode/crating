@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebAR Model Switch</title>
+  <title>WebAR Multiple 3D Models</title>
   <script src="https://apps.8thwall.com/xrweb.js"></script>
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <style>
@@ -17,52 +17,46 @@
       left: 10px;
       z-index: 1000;
       display: flex;
-      flex-direction: column; /* ปุ่มเรียงกันในแนวตั้ง */
+      flex-wrap: wrap;
       gap: 10px;
     }
-    button {
-      padding: 10px 15px;
-      font-size: 14px;
+    .ui-button {
+      width: 50px;
+      height: 50px;
       border: none;
-      border-radius: 5px;
-      background-color: #fff;
-      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      background-size: cover;
+      background-repeat: no-repeat;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: transform 0.2s;
     }
-    button:hover {
-      background-color: #ddd;
-    }
-    input {
-      padding: 10px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+    .ui-button:hover {
+      transform: scale(1.1);
     }
   </style>
 </head>
 <body>
-  <!-- คอนเทนเนอร์สำหรับปุ่มและอินพุต -->
+  <!-- UI Buttons -->
   <div id="ui-container">
-    <div>
-      <input id="model1" type="text" placeholder="https://cdn.jsdelivr.net/gh/nearcode/crating@259ecc8ba8caa14745f1f358fd0cd3f0f464db4e/sign1.png">
-      <button onclick="changeModelFromInput('https://cdn.jsdelivr.net/gh/nearcode/crating@259ecc8ba8caa14745f1f358fd0cd3f0f464db4e/sign1.png')">เปลี่ยนโมเดลที่ 1</button>
-    </div>
-    <div>
-      <input id="model2" type="text" placeholder="https://cdn.jsdelivr.net/gh/nearcode/crating@259ecc8ba8caa14745f1f358fd0cd3f0f464db4e/sign2.png">
-      <button onclick="changeModelFromInput('https://cdn.jsdelivr.net/gh/nearcode/crating@259ecc8ba8caa14745f1f358fd0cd3f0f464db4e/sign2.png')">เปลี่ยนโมเดลที่ 2</button>
-    </div>
-    <div>
-      <input id="model3" type="text" placeholder="https://cdn.jsdelivr.net/gh/nearcode/crating@259ecc8ba8caa14745f1f358fd0cd3f0f464db4e/sign3.png">
-      <button onclick="changeModelFromInput('https://cdn.jsdelivr.net/gh/nearcode/crating@259ecc8ba8caa14745f1f358fd0cd3f0f464db4e/sign3.png')">เปลี่ยนโมเดลที่ 3</button>
-    </div>
+    <!-- Buttons for Bush Model -->
+    <button class="ui-button" style="background-image: url('sign1.png');" onclick="changeModel('bush', 'bushpink.glb')"></button>
+    <button class="ui-button" style="background-image: url('sign2.png');" onclick="changeModel('bush', 'bushblue.glb')"></button>
+    <button class="ui-button" style="background-image: url('sign3.png');" onclick="changeModel('bush', 'bushnormal.glb')"></button>
+    <!-- Buttons for Daisy Model -->
+    <button class="ui-button" style="background-image: url('sign4.png');" onclick="changeModel('daisy', 'daisypink.glb')"></button>
+    <button class="ui-button" style="background-image: url('sign5.png');" onclick="changeModel('daisy', 'daisyred.glb')"></button>
+    <button class="ui-button" style="background-image: url('sign6.png');" onclick="changeModel('daisy', 'daisywhite.glb')"></button>
   </div>
 
   <!-- A-Frame Scene -->
   <a-scene xrweb>
-    <!-- 3D Model Container -->
-    <a-entity id="model-container" position="0 1.5 -3" rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
-      <a-entity id="model" gltf-model="4.glb"></a-entity>
+    <!-- Bush Model -->
+    <a-entity id="bush-container" position="-1 1.5 -3" rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
+      <a-entity id="bush" gltf-model="bushnormal.glb"></a-entity>
+    </a-entity>
+    
+    <!-- Daisy Model -->
+    <a-entity id="daisy-container" position="1 1.5 -3" rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
+      <a-entity id="daisy" gltf-model="daisywhite.glb"></a-entity>
     </a-entity>
 
     <!-- AR Camera -->
@@ -71,20 +65,13 @@
 
   <script>
     /**
-     * ฟังก์ชันสำหรับเปลี่ยนโมเดล 3D ผ่านลิงก์ที่ใส่ในช่องอินพุต
-     * @param {string} inputId - ID ของอินพุตที่เก็บลิงก์โมเดล
+     * Change the 3D model being displayed
+     * @param {string} modelId - ID of the model to change ('bush' or 'daisy')
+     * @param {string} modelPath - Path to the new 3D model
      */
-    function changeModelFromInput(inputId) {
-      // ดึงค่าลิงก์จากช่องอินพุต
-      const modelPath = document.getElementById(inputId).value;
-      // ตรวจสอบว่ามีการกรอกลิงก์หรือไม่
-      if (modelPath) {
-        const modelEntity = document.getElementById("model");
-        // อัปเดตคุณสมบัติ glTF ของโมเดลให้เป็นไฟล์ใหม่
-        modelEntity.setAttribute("gltf-model", modelPath);
-      } else {
-        alert("กรุณาใส่ลิงก์โมเดลก่อน!");
-      }
+    function changeModel(modelId, modelPath) {
+      const modelEntity = document.getElementById(modelId);
+      modelEntity.setAttribute("gltf-model", modelPath);
     }
   </script>
 </body>
