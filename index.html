@@ -3,86 +3,87 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR Object Placement</title>
-  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ar.js@3.3.2/aframe/build/aframe-ar.min.js"></script>
+  <title>WebAR Model Switch</title>
+  <script src="https://apps.8thwall.com/xrweb.js"></script>
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <style>
-    body { margin: 0; overflow: hidden; }
-    .ui-panel {
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    #ui-container {
       position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
       display: flex;
+      flex-direction: column; /* ปุ่มเรียงกันในแนวตั้ง */
       gap: 10px;
     }
-    .ui-button {
-      background-color: #ffffff;
-      border: 1px solid #ccc;
+    button {
       padding: 10px 15px;
       font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      background-color: #fff;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
       cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #ddd;
+    }
+    input {
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
       border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <!-- Scene -->
-  <a-scene embedded arjs>
-    <!-- กล้อง AR -->
-    <a-camera position="0 0 0" look-controls></a-camera>
-
-    <!-- พื้นผิวสำหรับการตรวจจับ -->
-    <a-plane id="ground" rotation="-90 0 0" width="10" height="10" color="lightgrey" visible="false"></a-plane>
-
-    <!-- โหนดสำหรับวัตถุ -->
-    <a-entity id="models"></a-entity>
-
-    <!-- แสง -->
-    <a-light type="directional" position="0 5 5"></a-light>
-    <a-light type="ambient" color="#ffffff"></a-light>
-  </a-scene>
-
-  <!-- UI -->
-  <div class="ui-panel">
-    <button class="ui-button" onclick="placeObject()">วางวัตถุ</button>
+  <!-- คอนเทนเนอร์สำหรับปุ่มและอินพุต -->
+  <div id="ui-container">
+    <div>
+      <input id="model1" type="text" placeholder="https://cdn.jsdelivr.net/gh/nearcode/crating@259ecc8ba8caa14745f1f358fd0cd3f0f464db4e/sign1.png">
+      <button onclick="changeModelFromInput('https://cdn.jsdelivr.net/gh/nearcode/crating@259ecc8ba8caa14745f1f358fd0cd3f0f464db4e/sign1.png')">เปลี่ยนโมเดลที่ 1</button>
+    </div>
+    <div>
+      <input id="model2" type="text" placeholder="https://cdn.jsdelivr.net/gh/nearcode/crating@259ecc8ba8caa14745f1f358fd0cd3f0f464db4e/sign2.png">
+      <button onclick="changeModelFromInput('https://cdn.jsdelivr.net/gh/nearcode/crating@259ecc8ba8caa14745f1f358fd0cd3f0f464db4e/sign2.png')">เปลี่ยนโมเดลที่ 2</button>
+    </div>
+    <div>
+      <input id="model3" type="text" placeholder="https://cdn.jsdelivr.net/gh/nearcode/crating@259ecc8ba8caa14745f1f358fd0cd3f0f464db4e/sign3.png">
+      <button onclick="changeModelFromInput('https://cdn.jsdelivr.net/gh/nearcode/crating@259ecc8ba8caa14745f1f358fd0cd3f0f464db4e/sign3.png')">เปลี่ยนโมเดลที่ 3</button>
+    </div>
   </div>
 
+  <!-- A-Frame Scene -->
+  <a-scene xrweb>
+    <!-- 3D Model Container -->
+    <a-entity id="model-container" position="0 1.5 -3" rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
+      <a-entity id="model" gltf-model="4.glb"></a-entity>
+    </a-entity>
+
+    <!-- AR Camera -->
+    <a-camera position="0 1.6 0" look-controls></a-camera>
+  </a-scene>
+
   <script>
-    function placeObject() {
-      const models = document.querySelector('#models');
-      const ground = document.querySelector('#ground');
-      const camera = document.querySelector('a-camera');
-
-      // ตรวจสอบว่ากล้องและพื้นพร้อมใช้งาน
-      if (!camera.components.camera || !ground.object3D) {
-        alert("AR ยังไม่พร้อมใช้งาน กรุณาลองใหม่อีกครั้ง");
-        return;
-      }
-
-      // สร้างโมเดลใหม่
-      const model = document.createElement('a-entity');
-      model.setAttribute(
-        'gltf-model',
-        'https://cdn.jsdelivr.net/gh/nearcode/crating@3027978bac5a5f024704ee3c66f334021c7233ca/untitled.glb'
-      );
-      model.setAttribute('scale', '0.5 0.5 0.5'); // ปรับขนาดโมเดล
-
-      // ใช้ Raycaster เพื่อคำนวณตำแหน่งที่กล้องกำลังมอง
-      const raycaster = new THREE.Raycaster();
-      const cameraEl = camera.components.camera.camera;
-      const direction = new THREE.Vector3(0, 0, -1); // ทิศทางที่กล้องมอง
-      direction.applyQuaternion(cameraEl.quaternion);
-
-      raycaster.set(cameraEl.position, direction);
-      const intersects = raycaster.intersectObject(ground.object3D, true);
-
-      if (intersects.length > 0) {
-        const point = intersects[0].point; // ตำแหน่งที่ตรวจจับได้
-        model.setAttribute('position', `${point.x} ${point.y + 0.2} ${point.z}`); // ยกขึ้นจากพื้นเล็กน้อย
-        models.appendChild(model);
+    /**
+     * ฟังก์ชันสำหรับเปลี่ยนโมเดล 3D ผ่านลิงก์ที่ใส่ในช่องอินพุต
+     * @param {string} inputId - ID ของอินพุตที่เก็บลิงก์โมเดล
+     */
+    function changeModelFromInput(inputId) {
+      // ดึงค่าลิงก์จากช่องอินพุต
+      const modelPath = document.getElementById(inputId).value;
+      // ตรวจสอบว่ามีการกรอกลิงก์หรือไม่
+      if (modelPath) {
+        const modelEntity = document.getElementById("model");
+        // อัปเดตคุณสมบัติ glTF ของโมเดลให้เป็นไฟล์ใหม่
+        modelEntity.setAttribute("gltf-model", modelPath);
       } else {
-        alert("ไม่พบพื้นผิวที่ตรวจจับได้");
+        alert("กรุณาใส่ลิงก์โมเดลก่อน!");
       }
     }
   </script>
