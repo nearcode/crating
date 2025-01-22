@@ -3,31 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web AR - Object Placement</title>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ar.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <title>The Sound of Hua Lam Phong</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://cdn.jsdelivr.net/gh/nearcode/Test1@44b4b3abb5fac017af54ac14f7555e8b25a328f8/Deep%20Space%20Bg.png'); /* ใส่ลิงค์ background */
+            background-size: cover;
+            color: white;
+            text-align: center;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .artboard {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 80%;  /* เพิ่มขนาดที่ต้องการ */
+            max-width: 600px;  /* ขนาดสูงสุด */
+            height: auto;
+            opacity: 0;
+            transition: opacity 2s ease;
+            display: none;  /* ปิดการแสดงผลเริ่มต้น */
+        }
+
+        .artboard.active {
+            opacity: 1;
+            display: flex;  /* เปิดการแสดงผลเมื่อ active */
+        }
+
+        .btn, .option {
+            padding: 10px 20px;
+            background-color: #444;
+            border-radius: 25px;
+            margin: 10px;
+            cursor: pointer;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        .btn:hover, .option:hover { background-color: #555; }
+
+        img {
+            max-width: 80%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            width: 90%;
+            max-width: 500px;
+            text-align: left;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 25px;
+            border: none;
+            background-color: #444;
+            color: white;
+            font-size: 1em;
+        }
+
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            background-color: #555;
+        }
+
+        .question-container {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .question-container.active {
+            display: block;
+        }
+
+        .question-container img {
+            max-width: 80%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            padding: 15px;
+            background-color: #555;
+            border-radius: 15px;
+            margin: 5px 0; /* ปรับ margin ให้มีช่องว่างระหว่างตัวเลือก */
+            cursor: pointer;
+            display: block;  /* ทำให้ตัวเลือกแสดงในแนวตั้ง */
+            width: 80%;  /* กำหนดขนาดความกว้างให้ตัวเลือก */
+            margin-left: auto; /* จัดให้อยู่ตรงกลาง */
+            margin-right: auto; /* จัดให้อยู่ตรงกลาง */
+        }
+
+        .warning {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .input-answer {
+            padding: 10px;
+            width: 80%;
+            margin: 15px auto;
+            border-radius: 25px;
+            border: none;
+            background-color: #444;
+            color: white;
+            font-size: 1em;
+        }
+
+    </style>
 </head>
-<body>
-    <a-scene embedded arjs>
-        <!-- Load assets -->
-        <a-assets>
-            <a-asset-item id="object1" src="https://cdn.jsdelivr.net/gh/nearcode/crating@3027978bac5a5f024704ee3c66f334021c7233ca/untitled.glb"></a-asset-item>
-        </a-assets>
+<body id="mainBody">
 
-        <!-- Placeholder for objects -->
-        <a-entity id="object-container" position="0 0 0"></a-entity>
+<!-- หน้าแรก -->
+<div id="imageScreen" class="artboard fade-in">
+    <img src="https://cdn.jsdelivr.net/gh/nearcode/Test1@44b4b3abb5fac017af54ac14f7555e8b25a328f8/logo.png" alt="The Sound of Hua Lam Phong">
+    <p>เลือกช่องทางในการเข้าร่วมงาน</p>
+    <div class="btn" onclick="submitChannel('online')">ONLINE</div>
+    <div class="btn" onclick="submitChannel('onsite')">ONSITE</div>
+</div>
 
-        <!-- Camera -->
-        <a-entity camera></a-entity>
-    </a-scene>
+<!-- หน้าลงทะเบียน -->
+<div id="artboard1" class="artboard fade-in">
+    <h2>ลงทะเบียนเพื่อร่วมกิจกรรม</h2>
+    <form id="registrationForm" class="form-container">
+        <div class="form-group">
+            <label for="nickname">ชื่อเล่น</label>
+            <input type="text" id="nickname" placeholder="ชื่อเล่น" required>
+        </div>
+        <div class="form-group">
+            <label for="age">ช่วงอายุ</label>
+            <select id="age" required>
+                <option value="" disabled selected>เลือกช่วงอายุ</option>
+                <option value="below18">ต่ำกว่า 18 ปี</option>
+                <option value="18-25">18-25 ปี</option>
+                <option value="26-35">26-35 ปี</option>
+                <option value="36-45">36-45 ปี</option>
+                <option value="46-55">46-55 ปี</option>
+                <option value="above55">มากกว่า 55 ปี</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="gender">เพศ</label>
+            <select id="gender" required>
+                <option value="" disabled selected>เลือกเพศ</option>
+                <option value="male">ชาย</option>
+                <option value="female">หญิง</option>
+                <option value="lgbtq">LGBTQ+</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="province">จังหวัด</label>
+            <select id="province" required>
+                <option value="" disabled selected>เลือกจังหวัด</option>
+                <script>
+                    const provinces = [
+                        "กรุงเทพมหานคร", "กระบี่", "กาญจนบุรี", "กาฬสินธุ์", "กำแพงเพชร", "ขอนแก่น", 
+                        "จันทบุรี", "ฉะเชิงเทรา", "ชลบุรี", "ชัยนาท", "ชัยภูมิ", "ชุมพร", "เชียงใหม่", "เชียงราย",
+                        "ตรัง", "ตราด", "ตาก", "นครนายก", "นครปฐม", "นครพนม", "นครราชสีมา", "นครศรีธรรมราช",
+                        "นครสวรรค์", "นนทบุรี", "นราธิวาส", "น่าน", "บึงกาฬ", "บุรีรัมย์", "ปทุมธานี",
+                        "ประจวบคีรีขันธ์", "ปราจีนบุรี", "ปัตตานี", "พระนครศรีอยุธยา", "พะเยา", "พังงา", "พัทลุง",
+                        "พิจิตร", "พิษณุโลก", "เพชรบุรี", "เพชรบูรณ์", "แพร่", "ภูเก็ต", "มหาสารคาม", "มุกดาหาร",
+                        "แม่ฮ่องสอน", "ยะลา", "ยโสธร", "ร้อยเอ็ด", "ระนอง", "ระยอง", "ราชบุรี", "ลพบุรี",
+                        "ลำปาง", "ลำพูน", "เลย", "ศรีสะเกษ", "สกลนคร", "สงขลา", "สตูล", "สมุทรปราการ",
+                        "สมุทรสงคราม", "สมุทรสาคร", "สระแก้ว", "สระบุรี", "สิงห์บุรี", "สุโขทัย", "สุพรรณบุรี",
+                        "สุราษฎร์ธานี", "สุรินทร์", "หนองคาย", "หนองบัวลำภู", "อ่างทอง", "อำนาจเจริญ",
+                        "อุดรธานี", "อุตรดิตถ์", "อุทัยธานี", "อุบลราชธานี"
+                    ];
+                    provinces.forEach(province => {
+                        document.write(`<option value="${province}">${province}</option>`);
+                    });
+                </script>
+            </select>
+        </div>
+        <div class="form-group">
+            <button type="button" class="btn" onclick="submitRegistration()">ยืนยัน</button>
+        </div>
+    </form>
+</div>
 
-    <!-- UI Buttons -->
-    <div id="ui-controls">
-        <button onclick="setActiveObject('object1')">Object 1</button>
-    </div>
+<!-- คำถาม -->
+<!-- คำถามทั้งหมด 7 ข้อ -->
+<div id="question1" class="question-container">
+    <h3>คุณชอบอาหารประเภทไหน?</h3>
+    <div class="option" onclick="nextQuestion(2)">Option A</div>
+    <div class="option" onclick="nextQuestion(2)">Option B</div>
+    <div class="option" onclick="nextQuestion(2)">Option C</div>
+    <div class="option" onclick="nextQuestion(2)">Option D</div>
+</div>
 
-    <script src="script.js"></script>
+<div id="question2" class="question-container">
+    <h3>คุณชอบทำกิจกรรมอะไรในวันหยุด?</h3>
+    <div class="option" onclick="nextQuestion(3)">Option A</div>
+    <div class="option" onclick="nextQuestion(3)">Option B</div>
+    <div class="option" onclick="nextQuestion(3)">Option C</div>
+    <div class="option" onclick="nextQuestion(3)">Option D</div>
+</div>
+
+<div id="question3" class="question-container">
+    <h3>คุณชอบเดินทางไปที่ไหน?</h3>
+    <div class="option" onclick="nextQuestion(4)">Option A</div>
+    <div class="option" onclick="nextQuestion(4)">Option B</div>
+    <div class="option" onclick="nextQuestion(4)">Option C</div>
+    <div class="option" onclick="nextQuestion(4)">Option D</div>
+</div>
+
+<div id="question4" class="question-container">
+    <h3>คุณชอบกิจกรรมกลางแจ้งหรือในร่ม?</h3>
+    <div class="option" onclick="nextQuestion(5)">Option A</div>
+    <div class="option" onclick="nextQuestion(5)">Option B</div>
+    <div class="option" onclick="nextQuestion(5)">Option C</div>
+    <div class="option" onclick="nextQuestion(5)">Option D</div>
+</div>
+
+<!-- คำถามแบบพิมพ์ตอบ -->
+<div id="question5" class="question-container">
+    <h3>คำถามที่ 1: กรุณาเขียนความคิดเห็นของคุณเกี่ยวกับงานนี้</h3>
+    <textarea class="input-answer" id="comment1" placeholder="พิมพ์ความคิดเห็นของคุณที่นี่..."></textarea>
+    <div class="btn" onclick="nextQuestion(6)">ถัดไป</div>
+</div>
+
+<div id="question6" class="question-container">
+    <h3>คำถามที่ 2: ความคิดเห็นของคุณเกี่ยวกับการจัดกิจกรรมในอนาคต?</h3>
+    <textarea class="input-answer" id="comment2" placeholder="พิมพ์ความคิดเห็นของคุณที่นี่..."></textarea>
+    <div class="btn" onclick="nextQuestion(7)">ถัดไป</div>
+</div>
+
+<div id="question7" class="question-container">
+    <h3>คำถามที่ 3: ท่านต้องการให้ปรับปรุงอะไรเกี่ยวกับกิจกรรมนี้?</h3>
+    <textarea class="input-answer" id="comment3" placeholder="พิมพ์ความคิดเห็นของคุณที่นี่..."></textarea>
+    <div class="btn" onclick="submitFeedback()">ส่งความคิดเห็น</div>
+</div>
+
+<!-- เพิ่มคำถาม 3-7 ตามรูปแบบเดียวกับข้างต้น -->
+
+<!-- หน้าแบบพิมพ์คำตอบ -->
+<div id="question8" class="question-container">
+    <h3>คำถามที่ 8: กรุณาเขียนความคิดเห็นของคุณเกี่ยวกับกิจกรรมนี้</h3>
+    <textarea class="input-answer" id="comment" placeholder="พิมพ์ความคิดเห็นของคุณที่นี่..."></textarea>
+    <div class="btn" onclick="submitFeedback()">ส่งความคิดเห็น</div>
+</div>
+
+<script>
+    function nextQuestion(questionNumber) {
+        let currentQuestion = document.getElementById('question' + (questionNumber - 1));
+        let nextQuestion = document.getElementById('question' + questionNumber);
+        currentQuestion.classList.remove('active');
+        nextQuestion.classList.add('active');
+    }
+
+    function submitChannel(channel) {
+        document.getElementById('imageScreen').classList.remove('active');
+        setTimeout(function() {
+            document.getElementById('artboard1').classList.remove('display-none');
+            document.getElementById('artboard1').classList.add('active');
+        }, 2000);
+    }
+
+    function submitRegistration() {
+        let nickname = document.getElementById('nickname').value;
+        let age = document.getElementById('age').value;
+        let gender = document.getElementById('gender').value;
+        let province = document.getElementById('province').value;
+
+        if (nickname && age && gender && province) {
+            document.getElementById('artboard1').classList.remove('active');
+            document.getElementById('artboard1').classList.add('display-none');
+            document.getElementById('question1').classList.remove('display-none');
+            document.getElementById('question1').classList.add('active');
+        } else {
+            alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+        }
+    }
+
+    function submitFeedback() {
+        let feedback = document.getElementById('comment').value;
+        if (feedback) {
+            alert('ความคิดเห็นของคุณถูกส่งแล้ว!');
+            // ทำการส่งความคิดเห็นไปที่เซิร์ฟเวอร์หรือที่เก็บข้อมูล
+        } else {
+            alert('กรุณาพิมพ์ความคิดเห็นของคุณ');
+        }
+    }
+
+    window.onload = function() {
+        setTimeout(function() {
+            document.getElementById('imageScreen').classList.add('active');
+        }, 100);
+    };
+</script>
+
 </body>
 </html>
